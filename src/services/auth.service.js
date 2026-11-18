@@ -2,14 +2,19 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/usuario.model');
 
-const registrar = async ({ nombre, email, password, rol }) => {
+const registrar = async ({ nombre, email, password }) => {
   const existe = await Usuario.findOne({ where: { email } });
   if (existe) throw { status: 409, message: 'El email ya está registrado' };
 
   const password_hash = await bcrypt.hash(password, 12);
-  const rolFinal = rol === 'administrador' ? 'dueno_mascota' : (rol || 'dueno_mascota');
 
-  const usuario = await Usuario.create({ nombre, email, password_hash, rol: rolFinal });
+  const usuario = await Usuario.create({
+    nombre,
+    email,
+    password_hash,
+    rol: 'dueno_mascota',
+  });
+
   const { password_hash: _, ...datos } = usuario.toJSON();
   return datos;
 };

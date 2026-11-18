@@ -1,13 +1,12 @@
 require('dotenv').config();
 const app = require('./src/app');
 const sequelize = require('./src/config/database');
-require('./src/models/usuario.model'); 
 
 const PORT = process.env.PORT || 3000;
 
-sequelize.sync({ alter: true })
+sequelize.authenticate()
   .then(() => {
-    console.log('BD conectada y sincronizada');
+    console.log('BD conectada');
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Backend listo en puerto ${PORT}`);
     });
