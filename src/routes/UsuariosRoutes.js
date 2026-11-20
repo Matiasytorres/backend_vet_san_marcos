@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const usuariosController = require('../controllers/usuarios.controller');
-const { verificarToken, soloAdmin } = require('../middleware/auth.middleware');
+const usuariosController = require('../controllers/UsuariosController');
+const { verificarToken, soloAdmin } = require('../middleware/AuthMiddleware');
 
 router.get('/', verificarToken, soloAdmin, usuariosController.listar);
 router.put('/:id', verificarToken, usuariosController.modificar);

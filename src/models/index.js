@@ -1,8 +1,8 @@
 const sequelize = require('../config/database');
-const Usuario = require('./usuario.model');
-const Servicio = require('./servicio.model');
-const Mascota = require('./mascota.model');
-const Cita = require('./cita.model');
+const Usuario = require('./UsuarioModel');
+const Servicio = require('./ServicioModel');
+const Mascota = require('./MascotaModel');
+const Cita = require('./CitaModel');
 
 // Un dueño tiene muchas mascotas
 Usuario.hasMany(Mascota, { foreignKey: 'usuario_id', as: 'mascotas' });

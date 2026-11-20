@@ -2,12 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { swaggerUi, specs } = require('./config/swagger');
-const { manejarErrores, rutaNoEncontrada } = require('./middleware/error.middleware');
-const authRoutes = require('./routes/auth.routes');
-const usuariosRoutes = require('./routes/usuarios.routes');
-const serviciosRoutes = require('./routes/servicios.routes');
-const mascotasRoutes = require('./routes/mascotas.routes');
-const citasRoutes = require('./routes/citas.routes');
+const { manejarErrores, rutaNoEncontrada } = require('./middleware/ErrorMiddleware');
+const authRoutes = require('./routes/AuthRoutes');
+const usuariosRoutes = require('./routes/UsuariosRoutes');
+const serviciosRoutes = require('./routes/ServiciosRoutes');
+const mascotasRoutes = require('./routes/MascotasRoutes');
+const citasRoutes = require('./routes/CitasRoutes');
 
 const app = express();
 

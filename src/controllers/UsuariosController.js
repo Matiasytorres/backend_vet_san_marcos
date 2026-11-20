@@ -1,4 +1,4 @@
-const Usuario = require('../models/usuario.model');
+const Usuario = require('../models/UsuarioModel');
 
 const ROLES_VALIDOS = ['administrador', 'recepcionista', 'dueno_mascota'];
 
