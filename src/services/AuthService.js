@@ -4,7 +4,7 @@ const Usuario = require('../models/UsuarioModel');
 const { ErrorHttp } = require('../utils/errores');
 const { textoEntre, emailValido, lanzarSiHayErrores } = require('../dto/reglas');
 
-const registrar = async ({ nombre, email, password }) => {
+const registrar = async ({ nombre, email, password } = {}) => {
   lanzarSiHayErrores([
     textoEntre(nombre, 'El nombre', 2, 100),
     emailValido(email),
@@ -31,7 +31,7 @@ const registrar = async ({ nombre, email, password }) => {
   return { id: usuario.id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol };
 };
 
-const login = async ({ email, password }) => {
+const login = async ({ email, password } = {}) => {
   lanzarSiHayErrores([
     typeof email === 'string' && email.trim() ? '' : 'El correo es obligatorio.',
     typeof password === 'string' && password ? '' : 'La contraseña es obligatoria.',
