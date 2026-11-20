@@ -5,9 +5,9 @@ const { verificarToken } = require('../middleware/auth.middleware');
 
 /**
  * @swagger
- * /api/auth/register:
+ * /api/v1/auth/register:
  *   post:
- *     summary: Registrar nuevo usuario
+ *     summary: Registrar nuevo usuario (siempre queda como dueño de mascota)
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -22,7 +22,7 @@ router.post('/register', authController.registrar);
 
 /**
  * @swagger
- * /api/auth/login:
+ * /api/v1/auth/login:
  *   post:
  *     summary: Iniciar sesión
  *     tags: [Auth]
@@ -39,7 +39,7 @@ router.post('/login', authController.login);
 
 /**
  * @swagger
- * /api/auth/me:
+ * /api/v1/auth/me:
  *   get:
  *     summary: Obtener usuario autenticado
  *     tags: [Auth]
