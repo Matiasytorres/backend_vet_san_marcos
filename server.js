@@ -4,8 +4,7 @@ const { sequelize } = require('./src/models');
 
 const PORT = process.env.PORT || 3000;
 
-sequelize.sync({ alter: true })
-  .then(() => {
+sequelize.sync({ alter: false })  .then(() => {
     console.log('BD conectada y sincronizada');
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Backend listo en puerto ${PORT}`);
