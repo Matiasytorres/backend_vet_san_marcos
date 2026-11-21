@@ -1,117 +1,61 @@
-import { useEffect, useState } from "react";
-import PlantillaAdmin from "../components/templates/PlantillaAdmin";
-import FormularioServicio from "../components/organisms/FormularioServicio";
-import Boton from "../components/atoms/Boton";
-import Cargando from "../components/atoms/Cargando";
-import Alerta from "../components/atoms/Alerta";
-import { listarServicios, crearServicio, actualizarServicio, eliminarServicio } from "../services/servicioService";
-import { obtenerMensajeError } from "../services/errores";
-import { formatearPrecio } from "../utils/formato";
+const Servicio = require('../models/ServicioModel');
+const { ErrorHttp } = require('../utils/errores');
+const { textoEntre, lanzarSiHayErrores } = require('../dto/reglas');
 
-export default function AdminServicios() {
-  const [servicios, setServicios] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  const [editando, setEditando] = useState(null);
-  const [exito, setExito] = useState("");
-  const [error, setError] = useState("");
+const aDto = (s) => ({
+  id: s.id, codigo: s.codigo, nombre: s.nombre, categoria: s.categoria,
+  especie: s.especie, duracion: s.duracion,
+  precio: s.precio, observaciones: s.observaciones,
+});
 
-  useEffect(() => {
-    cargar();
-  }, []);
+const listar = async () => {
+  const servicios = await Servicio.findAll({ order: [['nombre', 'ASC']] });
+  return servicios.map(aDto);
+};
 
-  async function cargar() {
-    try {
-      const datos = await listarServicios();
-      setServicios(datos);
-    } catch (e) {
-      setError(obtenerMensajeError(e));
-    } finally {
-      setCargando(false);
-    }
-  }
+const crear = async ({ nombre, categoria, especie, duracion, precio, observaciones } = {}) => {
+  lanzarSiHayErrores([
+    textoEntre(nombre, 'El nombre', 2, 100),
+    textoEntre(categoria, 'La categoría', 2, 30),
+    textoEntre(especie, 'La especie', 2, 40),
+    textoEntre(duracion, 'La duración', 1, 20),
+  ]);
+  const total = await Servicio.count();
+  const codigo = `SRV-${String(total + 1).padStart(3, '0')}`;
+  const s = await Servicio.create({
+    codigo,
+    nombre: nombre.trim(),
+    categoria: categoria.trim(),
+    especie: especie.trim(),
+    duracion: duracion.trim(),
+    precio: Number(precio) || 0,
+    observaciones: observaciones?.trim() || '',
+  });
+  return aDto(s);
+};
 
-  async function guardar(datos) {
-    setExito(""); setError("");
-    try {
-      if (editando) {
-        const actualizado = await actualizarServicio(editando.id, datos);
-        setServicios((prev) => prev.map((s) => s.id === actualizado.id ? actualizado : s));
-        setExito("Servicio actualizado correctamente.");
-        setEditando(null);
-      } else {
-        const nuevo = await crearServicio(datos);
-        setServicios((prev) => [...prev, nuevo]);
-        setExito("Servicio creado correctamente.");
-      }
-    } catch (e) {
-      setError(obtenerMensajeError(e));
-    }
-  }
+const actualizar = async (id, { nombre, categoria, especie, duracion, precio, observaciones } = {}) => {
+  const s = await Servicio.findByPk(id);
+  if (!s) throw new ErrorHttp(404, 'Servicio no encontrado.');
+  lanzarSiHayErrores([
+    textoEntre(nombre, 'El nombre', 2, 100),
+    textoEntre(categoria, 'La categoría', 2, 30),
+    textoEntre(especie, 'La especie', 2, 40),
+    textoEntre(duracion, 'La duración', 1, 20),
+  ]);
+  await s.update({
+    nombre: nombre.trim(), categoria: categoria.trim(),
+    especie: especie.trim(), duracion: duracion.trim(),
+    precio: Number(precio) || 0,
+    observaciones: observaciones?.trim() || '',
+  });
+  return aDto(s);
+};
 
-  async function eliminar(id) {
-    if (!window.confirm("¿Eliminar este servicio?")) return;
-    setExito(""); setError("");
-    try {
-      await eliminarServicio(id);
-      setServicios((prev) => prev.filter((s) => s.id !== id));
-      setExito("Servicio eliminado.");
-      if (editando?.id === id) setEditando(null);
-    } catch (e) {
-      setError(obtenerMensajeError(e));
-    }
-  }
+const eliminar = async (id) => {
+  const s = await Servicio.findByPk(id);
+  if (!s) throw new ErrorHttp(404, 'Servicio no encontrado.');
+  await s.destroy();
+};
 
-  return (
-    <PlantillaAdmin titulo="Administrar servicios">
-      {exito && <Alerta variante="success" texto={exito} />}
-      {error && <Alerta texto={error} />}
-
-      <FormularioServicio
-        key={editando?.id ?? "nuevo"}
-        servicio={editando}
-        onGuardar={guardar}
-        onCancelar={() => setEditando(null)}
-      />
-
-      {cargando ? (
-        <Cargando texto="Cargando servicios..." />
-      ) : servicios.length === 0 ? (
-        <p className="text-secondary text-center">No hay servicios. Agrega el primero.</p>
-      ) : (
-        <div className="card shadow-sm">
-          <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Nombre</th>
-                  <th>Categoría</th>
-                  <th>Especie</th>
-                  <th>Precio</th>
-                  <th className="text-end">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {servicios.map((s) => (
-                  <tr key={s.id}>
-                    <td className="font-monospace">{s.codigo}</td>
-                    <td className="fw-semibold">{s.nombre}</td>
-                    <td>{s.categoria}</td>
-                    <td>{s.especie}</td>
-                    <td>${formatearPrecio(s.precio)}</td>
-                    <td className="text-end">
-                      <div className="d-inline-flex gap-2">
-                        <Boton texto="Editar" variante="outline-primary" className="btn-sm" onClick={() => setEditando(s)} />
-                        <Boton texto="Eliminar" variante="outline-danger" className="btn-sm" onClick={() => eliminar(s.id)} />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-    </PlantillaAdmin>
-  );
-}
+module.exports = { listar, crear, actualizar, eliminar };
