@@ -4,9 +4,9 @@ const { sequelize } = require('./src/models');
 
 const PORT = process.env.PORT || 3000;
 
-sequelize.authenticate()
+sequelize.sync({ alter: true })
   .then(() => {
-    console.log('BD conectada');
+    console.log('BD conectada y sincronizada');
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Backend listo en puerto ${PORT}`);
     });
